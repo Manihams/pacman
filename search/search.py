@@ -87,12 +87,55 @@ def depthFirstSearch(problem: SearchProblem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Graph-search DFS: the frontier is a LIFO stack of (state, actions-to-reach-state).
+    # A state is marked visited when it is expanded (popped), so it is never
+    # expanded twice even if it was pushed onto the frontier more than once.
+    frontier = util.Stack()
+    frontier.push((problem.getStartState(), []))
+    visited = set()
+
+    while not frontier.isEmpty():
+        state, actions = frontier.pop()
+
+        if problem.isGoalState(state):
+            return actions
+
+        if state in visited:
+            continue
+        visited.add(state)
+
+        for successor, action, stepCost in problem.getSuccessors(state):
+            if successor not in visited:
+                frontier.push((successor, actions + [action]))
+
+    # No path to a goal was found.
+    return []
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Graph-search BFS: the frontier is a FIFO queue of (state, actions-to-reach-state).
+    # States are marked visited when they are first pushed, so each state enters the
+    # frontier at most once; since every edge is explored in order of depth, the
+    # first time a goal is popped it was reached by a fewest-actions path.
+    start = problem.getStartState()
+    frontier = util.Queue()
+    frontier.push((start, []))
+    visited = {start}
+
+    while not frontier.isEmpty():
+        state, actions = frontier.pop()
+
+        if problem.isGoalState(state):
+            return actions
+
+        for successor, action, stepCost in problem.getSuccessors(state):
+            if successor not in visited:
+                visited.add(successor)
+                frontier.push((successor, actions + [action]))
+
+    # No path to a goal was found.
+    return []
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
@@ -133,7 +176,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     priorityQueue = util.PriorityQueue()
 
     startState = problem.getStartState()
-    startHeuristic = heuristic(starState, problem)
+    startHeuristic = heuristic(startState, problem)
 
     priorityQueue.push((startState, [], 0), startHeuristic)  # (state, path, cost)
 
